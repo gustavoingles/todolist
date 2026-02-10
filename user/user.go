@@ -8,15 +8,15 @@ type User struct {
 	PasswordHash string
 }
 
-type CreateUserCommand struct {
-	Name     string
-	Password string
+type Bar struct {
+	NewName string
+	NewPassword string
 }
 
 type UserRepository interface {
-	CreateUser(ctx context.Context, cmd CreateUserCommand) error
+	CreateUser(ctx context.Context, u User) error
 	GetUserById(ctx context.Context, uID int64) (User, error)
 	GetUserByName(ctx context.Context, uName string) (User, error)
-	UpdateUserName(ctx context.Context, updateFn func(*User) error) error
+	UpdateUserById(ctx context.Context, uID int64, dataToChange Bar) error
 	DeleteUserById(ctx context.Context, uID int64) error
 }

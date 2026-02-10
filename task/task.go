@@ -41,17 +41,9 @@ type Task struct {
 	CreatedAt   time.Time
 }
 
-type CreateTaskCommand struct {
-	Name        string
-	Description string
-	Status      Status
-	Label       string
-	CreatedAt   time.Time
-}
-
 type TaskRepository interface {
-	CreateTask(ctx context.Context, cmd CreateTaskCommand) error
+	CreateTask(ctx context.Context, t Task) error
 	GetTaskById(ctx context.Context, tID int64) (*Task, error)
-	UpdateTaskById(ctx context.Context, tID int64, updateFn func(*Task) error) error
+	UpdateTaskById(ctx context.Context, tID int64) error
 	DeleteTaskById(ctx context.Context, tID int64) error
 }

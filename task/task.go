@@ -37,13 +37,21 @@ type Task struct {
 	Name        string
 	Description string
 	Status      Status
-	Label       string
+	Label       []string
 	CreatedAt   time.Time
+}
+
+type TaskUpdateData struct {
+	NewName        string
+	NewDescription string
+	NewStatus      Status
+	NewLabel       []string
 }
 
 type TaskRepository interface {
 	CreateTask(ctx context.Context, t Task) error
 	GetTaskById(ctx context.Context, tID int64) (*Task, error)
-	UpdateTaskById(ctx context.Context, tID int64) error
+	GetAllTasks(ctx context.Context) ([]Task, error)
+	UpdateTaskById(ctx context.Context, tID int64, dataToChange TaskUpdateData) error
 	DeleteTaskById(ctx context.Context, tID int64) error
 }

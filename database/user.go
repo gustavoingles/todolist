@@ -15,47 +15,47 @@ type UserDB struct {
 	CreatedAt    time.Time `gorm:"autoCreateTime"`
 }
 
-type UserFoo struct {
-	bar *gorm.DB
+type UserStore struct {
+	db *gorm.DB
 }
 
-func (u *UserFoo) CreateUser(ctx context.Context, us user.User) error {
-	err := gorm.G[UserDB](u.bar).Create(ctx, &UserDB{
-		Name: us.Name,
+func (u *UserStore) CreateUser(ctx context.Context, us user.User) error {
+	err := gorm.G[UserDB](u.db).Create(ctx, &UserDB{
+		Name:         us.Name,
 		PasswordHash: us.PasswordHash,
-		CreatedAt: time.Now(),
+		CreatedAt:    time.Now(),
 	})
 	return err
 }
 
-func (u *UserFoo) GetUserById(ctx context.Context, uID int64) (user.User, error) {
-	us, err := gorm.G[UserDB](u.bar).Where("id = ?", uID).First(ctx)
-	if err != nil {
-		return user.User{}, err
-	}
-	
-	return user.User{
-		ID: us.ID,
-		Name: us.Name,
-		PasswordHash: us.PasswordHash,
-	},nil
-}
-
-func (u *UserFoo) GetUserByName(ctx context.Context, uName string) (user.User, error) {
-	us, err := gorm.G[UserDB](u.bar).Where("name = ?", uName).First(ctx)
+func (u *UserStore) GetUserById(ctx context.Context, uID int64) (user.User, error) {
+	us, err := gorm.G[UserDB](u.db).Where("id = ?", uID).First(ctx)
 	if err != nil {
 		return user.User{}, err
 	}
 
 	return user.User{
-		ID: us.ID,
-		Name: us.Name,
+		ID:           us.ID,
+		Name:         us.Name,
 		PasswordHash: us.PasswordHash,
 	}, nil
 }
 
-func (u *UserFoo) UpdateUserById(ctx context.Context, uID int64, f user.Bar) error {
-	err := u.bar.Transaction(func(tx *gorm.DB) error {
+func (u *UserStore) GetUserByName(ctx context.Context, uName string) (user.User, error) {
+	us, err := gorm.G[UserDB](u.db).Where("name = ?", uName).First(ctx)
+	if err != nil {
+		return user.User{}, err
+	}
+
+	return user.User{
+		ID:           us.ID,
+		Name:         us.Name,
+		PasswordHash: us.PasswordHash,
+	}, nil
+}
+
+func (u *UserStore) UpdateUserById(ctx context.Context, uID int64, f user.UserUpdateData) error {
+	err := u.db.Transaction(func(tx *gorm.DB) error {
 		user, err := gorm.G[UserDB](tx).Where("id = ?", uID).First(ctx)
 		if err != nil {
 			return err
@@ -64,7 +64,7 @@ func (u *UserFoo) UpdateUserById(ctx context.Context, uID int64, f user.Bar) err
 		updateFn := func(uDB *UserDB) UserDB {
 			uDB.Name = f.NewName
 			uDB.PasswordHash = f.NewPassword
-			return *uDB 
+			return *uDB
 		}
 
 		_, err = gorm.G[UserDB](tx).Updates(ctx, updateFn(&user))
@@ -73,7 +73,7 @@ func (u *UserFoo) UpdateUserById(ctx context.Context, uID int64, f user.Bar) err
 	return err
 }
 
-func (u *UserFoo) DeleteUserById(ctx context.Context, uID int64) error {
-	_, err := gorm.G[UserDB](u.bar).Where("id = ?", uID).Delete(ctx)
+func (u *UserStore) DeleteUserById(ctx context.Context, uID int64) error {
+	_, err := gorm.G[UserDB](u.db).Where("id = ?", uID).Delete(ctx)
 	return err
 }
